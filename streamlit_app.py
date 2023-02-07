@@ -1,18 +1,18 @@
 import streamlit as st
 # import streamlit_authenticator as stauth
 
-# hashed_passwords = stauth.Hasher(['abc', 'def']).generate()
+hashed_passwords = stauth.Hasher(['abc', 'def']).generate()
 
-# with open('../config.yaml') as file:
-#     config = yaml.load(file, Loader=SafeLoader)
+with open('../config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
-# authenticator = stauth.Authenticate(
-#     config['credentials'],
-#     config['cookie']['name'],
-#     config['cookie']['key'],
-#     config['cookie']['expiry_days'],
-#     config['preauthorized']
-# )
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
 
 
 
