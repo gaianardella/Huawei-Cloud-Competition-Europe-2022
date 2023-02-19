@@ -4,6 +4,8 @@ import tensorflow as tf
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+import pickle
+from obs import ObsClient, CorsRule, Options
 
 # Create a parsing task.
 parser = argparse.ArgumentParser(description="train color pairs",
@@ -29,3 +31,12 @@ X_test = X_test.replace(color_dict)
 # Create a logistic regression model and fit it to the training data
 model = LogisticRegression()
 model.fit(X_train, y_train)
+
+serialized_model=pickle.dumps(model)
+
+# save the trained object to disk
+# with open('my_model.pickle', 'wb') as f:
+#     pickle.dump(serialized_object, f)
+
+obsClient = ObsClient(access_key_id='X8KGMVB3Q0CGVULR5YX4', secret_access_key='RqFFvphp2wTdkKqRYMLqKBk8KsL0mBRWs1vRfFQP', server='obs.eu-west-101.myhuaweicloud.eu')
+response = obsClient.putContent(bucketName="outfits", objectKey="pairs/my_model.pickle", content=serialized_model)
