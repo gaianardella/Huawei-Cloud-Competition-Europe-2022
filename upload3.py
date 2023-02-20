@@ -10,22 +10,22 @@ from kivy.uix.image import AsyncImage
 import io
 from io import BytesIO
 from kivy.uix.button import Button
-from huaweicloudsdkcore.auth.credentials import BasicCredentials
 import numpy as np
 import random
+from kivy.clock import Clock
+from kivymd.uix.button import MDRectangleFlatButton
+import uuid
+import shutil
 
 # Huawei Cloud OBS (Object Storage Service) access keys and bucket name
 endpoint = "http://obs.eu-west-101.myhuaweicloud.eu"
 server="obs.eu-west-101.myhuaweicloud.eu"
-access_key = "JAKGEFBQBLHWUNWWGIGI"
-secret_key = "3lRysHwqAlRnw7kVFSWRCZFuIbdHau6UYHfzObz3"
+access_key = ""
+secret_key = ""
 bucket_name = "clothes"
 
-# Temporary access token expiration time in seconds
-expire_seconds = 3600
-
 # Create an OBS client object with the access keys and server URL
-obsClient = ObsClient(access_key_id='X8KGMVB3Q0CGVULR5YX4', secret_access_key='RqFFvphp2wTdkKqRYMLqKBk8KsL0mBRWs1vRfFQP', server='obs.eu-west-101.myhuaweicloud.eu')
+obsClient = ObsClient(access_key_id=access_key, secret_access_key=secret_key, server='obs.eu-west-101.myhuaweicloud.eu')
 
 # Kivy language string that describes the user interface
 KV="""
@@ -205,7 +205,12 @@ MDFloatLayout:
                     size_hint_x: .10
                     pos_hint: {"center_x": .7, "center_y": .6}
                     on_release: app.next4(self.text)
-            
+            MDFloatLayout:
+                MDLabel:
+                    text: "Do you like your outfit?"
+                    bold: True
+                    pos_hint: {"center_x": .6, "center_y": .6}
+                    font_style: "H6"
     MDLabel:
         text: "A Cloud Closet"
         bold: True
@@ -277,6 +282,9 @@ MDFloatLayout:
 """
 # Create a dictionary of users and their passwords
 users={"admin":"psw"}
+
+#Create list of filepaths created when new outfit generated and delete all of them when app is closed
+filepaths=[]
 
 # Initialize variables for storing user choices
 chosen_color=""
@@ -383,16 +391,32 @@ class ProjectApp(MDApp):
 
         # Choose a random object from the list and download it to a local file named "temp_outfit.jpeg"
         random_element = random.choice(li)
+
         # Download the random object to a local file named "temp_outfit.jpeg"
-        filename = "temp_outfit.jpeg"
-        local_path = os.path.abspath(filename)
+        # filename = "temp_outfit.jpeg"
+        filename = f"{str(uuid.uuid4())}.jpeg"
+        folder_name = "styles"
+        local_path = os.path.abspath(os.path.join(folder_name, filename))
+        filepaths.append(local_path)
+        print(filepaths)
+
         res = obsClient.getObject("outfits", random_element ,local_path)
         
         # Create an AsyncImage widget with the downloaded image and add it to the slide layout
         image = AsyncImage(source=local_path, size_hint=(0.8, 0.8), pos_hint={"center_x": 0.5, "center_y": 0.3})
-        
-        li=[]
         self.root.ids.slide.add_widget(image)
+
+        li=[]
+        # Create a button widget and add it to the widget tree
+        # Clock.schedule_once(lambda dt: self.root.ids.slide.clear_widgets(), 8)
+        Clock.schedule_once(lambda dt: self.create_button(), 1)
+        
+    def create_button(self):
+        # Create a button widget and add it to the widget tree
+        button = MDRectangleFlatButton(text="Generate again", pos_hint={"center_x": 0.5, "center_y": 0.55}, md_bg_color=(0, 0.5, 1, 1), text_color=(1, 1, 1, 1))
+        button.bind(on_press=self.next4)
+        self.root.add_widget(button)
+        
     
     def skip(self):
         # Move to the next slide using the 'load_next' method of the slide layout
@@ -401,7 +425,14 @@ class ProjectApp(MDApp):
     def previous(self):
         # Move to the previous slide using the 'load_previous' method of the slide layout
         self.root.ids.slide.load_previous()
-        
+    
+    def on_stop(self):
+        # Delete the file when the app is stopped
+        # for path in filepaths:
+        #     if os.path.exists(path):
+        #         os.remove(path)
+        styles_dir = os.path.abspath("styles")
+        shutil.rmtree(styles_dir)
 # Create a ProjectApp instance and run the app
 app = ProjectApp()
 app.run()
