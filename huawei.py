@@ -9,8 +9,6 @@ app.secret_key = 'secret_key'  # replace with a secret key of your own
 app.debug = True
 
 
-# User Name,Access Key Id,Secret Access Key
-# "hid_1-wsovni7u703ma",X8KGMVB3Q0CGVULR5YX4,RqFFvphp2wTdkKqRYMLqKBk8KsL0mBRWs1vRfFQP
 
 users = [
     {
@@ -70,14 +68,6 @@ def upload():
         if 'top_btn' in request.form:
             # # Upload the file and redirect to top.html
             # file = request.files['file']
-
-            # # Connect to Huawei Cloud and upload the image to the bucket
-            # obs = boto3.OBS({
-            #     'access_key_id': 'X8KGMVB3Q0CGVULR5YX4', #'<Your Access Key ID>',
-            #     'secret_access_key': 'RqFFvphp2wTdkKqRYMLqKBk8KsL0mBRWs1vRfFQP',  #'<Your Secret Access Key>',
-            #     'server': 'obs.eu-west-101.myhuaweicloud.com' #'obs.cn-north-4.myhuaweicloud.com'
-            # })
-            # obs.put_object('clothes', 'top', file.read())
 
             return redirect('/top')
 
